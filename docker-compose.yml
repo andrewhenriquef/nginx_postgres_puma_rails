@@ -1,0 +1,38 @@
+version: '3'
+services:
+  web:
+    image: nginx
+    build:
+      context: .
+      dockerfile: ./nginx/Dockerfile
+    depends_on:
+      - app
+    ports:
+      - 80:80
+  postgres:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: pwd
+    volumes:
+      - ./tmp/postgres:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+  app:
+    build: .
+    volumes:
+      - .:/nginx_postgres_puma_rails
+    ports:
+      - "3000:3000"
+    environment:
+      - RAILS_ENV=${RAILS_ENV}
+    depends_on:
+      - postgres
+      - redis
+  redis:
+    image: redis
+    volumes:
+      - ./tmp/redis:/var/lib/redis
+    ports:
+      - "6379:6379"
+
